@@ -8,6 +8,32 @@ import java.util.List;
 
 public class RegistroAcademicoDAO {
 
+    public RegistroAcademicoDAO() {
+        criarTabelaSeNaoExistir();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        String sql = "CREATE TABLE IF NOT EXISTS registros_academicos ("
+                   + "id_registro INT AUTO_INCREMENT PRIMARY KEY, "
+                   + "id_aluno INT NOT NULL, "
+                   + "id_disciplina INT NOT NULL, "
+                   + "id_turma INT NOT NULL, "
+                   + "nota_p1 DECIMAL(5,2), "
+                   + "nota_p2 DECIMAL(5,2), "
+                   + "nota_trabalho DECIMAL(5,2), "
+                   + "media_final DECIMAL(5,2), "
+                   + "total_faltas INT, "
+                   + "percentual_frequencia DECIMAL(5,2), "
+                   + "situacao_academica VARCHAR(50)"
+                   + ")";
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar/criar a tabela registros_academicos: " + e.getMessage());
+        }
+    }
+
     public void cadastrar(RegistroAcademico reg) {
         String sql = "INSERT INTO registros_academicos (id_aluno, id_disciplina, id_turma, "
                    + "nota_p1, nota_p2, nota_trabalho, media_final, total_faltas, "

@@ -8,6 +8,25 @@ import java.util.List;
 
 public class AlunoDAO {
 
+    public AlunoDAO() {
+        criarTabelaSeNaoExistir();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        String sql = "CREATE TABLE IF NOT EXISTS alunos ("
+                   + "id_aluno INT AUTO_INCREMENT PRIMARY KEY, "
+                   + "nome VARCHAR(150) NOT NULL, "
+                   + "ra VARCHAR(50) NOT NULL UNIQUE, "
+                   + "email VARCHAR(150) NOT NULL"
+                   + ")";
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar/criar a tabela alunos: " + e.getMessage());
+        }
+    }
+
     public void cadastrar(Aluno aluno) {
         String sql = "INSERT INTO alunos (nome, ra, email) VALUES (?, ?, ?)";
         try (Connection conn = ConexaoBD.getConexao();
@@ -43,7 +62,8 @@ public class AlunoDAO {
     }
 
     public void atualizar(Aluno aluno) {
-        String sql = "UPDATE alunos SET nome = ?, ra = ?, email = ? WHERE id = ?";
+        // Corrigido de 'WHERE id = ?' para 'WHERE id_aluno = ?'
+        String sql = "UPDATE alunos SET nome = ?, ra = ?, email = ? WHERE id_aluno = ?";
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, aluno.getNome());
@@ -57,7 +77,8 @@ public class AlunoDAO {
     }
 
     public void excluir(int idAluno) {
-        String sql = "DELETE FROM alunos WHERE id = ?";
+        // Corrigido de 'WHERE id = ?' para 'WHERE id_aluno = ?'
+        String sql = "DELETE FROM alunos WHERE id_aluno = ?";
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idAluno);

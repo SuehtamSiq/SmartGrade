@@ -8,6 +8,26 @@ import java.util.List;
 
 public class AvaliacaoDAO {
 
+    public AvaliacaoDAO() {
+        criarTabelaSeNaoExistir();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        String sql = "CREATE TABLE IF NOT EXISTS avaliacoes ("
+                   + "id_avaliacao INT AUTO_INCREMENT PRIMARY KEY, "
+                   + "id_turma INT NOT NULL, "
+                   + "titulo VARCHAR(200) NOT NULL, "
+                   + "peso DOUBLE, "
+                   + "data_entrega DATE"
+                   + ")";
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar/criar a tabela avaliacoes: " + e.getMessage());
+        }
+    }
+
     public void cadastrar(Avaliacao av) {
         String sql = "INSERT INTO avaliacoes (id_turma, titulo, peso, data_entrega) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConexaoBD.getConexao();
@@ -31,7 +51,8 @@ public class AvaliacaoDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Avaliacao a = new Avaliacao();
-                    a.setIdAvaliacao(rs.getInt("id")); // confira se no banco é 'id' ou 'id_avaliacao'
+                    // Padronizado para 'id_avaliacao'
+                    a.setIdAvaliacao(rs.getInt("id_avaliacao")); 
                     a.setIdTurma(rs.getInt("id_turma"));
                     a.setTitulo(rs.getString("titulo"));
                     a.setPeso(rs.getDouble("peso"));
@@ -46,7 +67,8 @@ public class AvaliacaoDAO {
     }
 
     public void excluir(int idAvaliacao) {
-        String sql = "DELETE FROM avaliacoes WHERE id = ?";
+        // Padronizado de 'WHERE id = ?' para 'WHERE id_avaliacao = ?'
+        String sql = "DELETE FROM avaliacoes WHERE id_avaliacao = ?";
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idAvaliacao);

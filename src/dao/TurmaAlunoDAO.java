@@ -7,6 +7,25 @@ import java.util.List;
 
 public class TurmaAlunoDAO {
 
+    public TurmaAlunoDAO() {
+        criarTabelaSeNaoExistir();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        // Tabela associativa com chave primária composta para evitar alunos duplicados na mesma turma
+        String sql = "CREATE TABLE IF NOT EXISTS turma_alunos ("
+                   + "id_turma INT NOT NULL, "
+                   + "id_aluno INT NOT NULL, "
+                   + "PRIMARY KEY (id_turma, id_aluno)"
+                   + ")";
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar/criar a tabela turma_alunos: " + e.getMessage());
+        }
+    }
+
     public void matricularAluno(int idTurma, int idAluno) {
         String sql = "INSERT INTO turma_alunos (id_turma, id_aluno) VALUES (?, ?)";
         try (Connection conn = ConexaoBD.getConexao();

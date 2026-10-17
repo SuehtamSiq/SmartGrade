@@ -8,17 +8,42 @@ import java.util.List;
 
 public class AcademicoDAO {
 
-    private Connection conexao;
-
     public AcademicoDAO() {
-        this.conexao = ConexaoBD.getConexao();
+        criarTabelaSeNaoExistir();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        // Tabela criada com tipos DECIMAL(5,2) para suportar notas como 10.00 ou 07.50
+        String sql = "CREATE TABLE IF NOT EXISTS registros_academicos ("
+                   + "id_registro INT AUTO_INCREMENT PRIMARY KEY, "
+                   + "id_aluno INT NOT NULL, "
+                   + "id_disciplina INT NOT NULL, "
+                   + "id_turma INT NOT NULL, "
+                   + "nota_p1 DECIMAL(5,2), "
+                   + "nota_p2 DECIMAL(5,2), "
+                   + "nota_trabalho DECIMAL(5,2), "
+                   + "media_final DECIMAL(5,2), "
+                   + "total_faltas INT, "
+                   + "percentual_frequencia DECIMAL(5,2), "
+                   + "situacao_academica VARCHAR(50)"
+                   + ")";
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar/criar a tabela registros_academicos: " + e.getMessage());
+        }
     }
 
     public boolean salvarRegistro(RegistroAcademico registro) {
         String sql = "INSERT INTO registros_academicos (id_aluno, id_disciplina, id_turma, "
                    + "nota_p1, nota_p2, nota_trabalho, media_final, total_faltas, "
                    + "percentual_frequencia, situacao_academica) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+        
+        // Conexão agora é aberta e fechada localmente para evitar vazamento (Too many connections)
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             stmt.setInt(1, registro.getIdAluno());
             stmt.setInt(2, registro.getIdDisciplina());
             stmt.setInt(3, registro.getIdTurma());
@@ -41,7 +66,10 @@ public class AcademicoDAO {
         String sql = "UPDATE registros_academicos SET nota_p1 = ?, nota_p2 = ?, nota_trabalho = ?, "
                    + "media_final = ?, total_faltas = ?, percentual_frequencia = ?, "
                    + "situacao_academica = ? WHERE id_registro = ?";
-        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+        
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             stmt.setBigDecimal(1, registro.getNotaP1());
             stmt.setBigDecimal(2, registro.getNotaP2());
             stmt.setBigDecimal(3, registro.getNotaTrabalho());
@@ -62,7 +90,6 @@ public class AcademicoDAO {
         String sql = "SELECT * FROM registros_academicos WHERE id_turma = ? AND id_disciplina = ?";
         List<RegistroAcademico> lista = new ArrayList<>();
 
-        // Abre uma conexão nova e limpa direto para esta busca
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -95,4 +122,4 @@ public class AcademicoDAO {
         }
         return lista;
     }
-    }
+}
