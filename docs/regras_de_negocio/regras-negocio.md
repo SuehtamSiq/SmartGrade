@@ -323,171 +323,110 @@ A classificação de risco deve ser utilizada como ferramenta de apoio à
 decisão e acompanhamento pedagógico, não como confirmação de reprovação
 ou evasão.
 
----
+# Regras de Negócio (RN) — SmartGrade
 
-# 9. Alertas Acadêmicos
-
-### RN50 — Alerta de baixo desempenho
-
-O sistema deverá identificar alunos cuja média esteja abaixo de 7,00,
-considerando-os como alunos que necessitam de atenção.
-
-### RN51 — Alerta de frequência
-
-O sistema deverá destacar alunos cuja frequência esteja entre 75% e
-80%.
-
-### RN52 — Alerta de reprovação por falta
-
-O sistema deverá destacar alunos cuja frequência esteja abaixo de 75%.
-
-### RN53 — Alerta de alto risco
-
-O sistema deverá destacar alunos classificados pelo modelo preditivo como
-"Alto Risco".
-
-### RN54 — Múltiplos indicadores
-
-Um mesmo aluno poderá apresentar simultaneamente diferentes alertas,
-como baixo desempenho, baixa frequência e alto risco preditivo.
+## 1. Objetivo
+Este documento define as regras de negócio abstratas que determinam o comportamento, as validações e as decisões acadêmicas do sistema SmartGrade. Estas regras são independentes da linguagem de programação ou do banco de dados e servem para garantir a integridade dos processos escolares.
 
 ---
 
-# 10. Histórico e Análises
+## 2. Cadastro, Identificação e Integridade
 
-### RN55 — Histórico acadêmico
-
-Os registros acadêmicos devem permitir a consulta das notas, médias,
-faltas, frequência e situação acadêmica do aluno.
-
-### RN56 — Histórico de risco
-
-As análises preditivas armazenadas devem permitir acompanhar a evolução
-do score e da classificação de risco ao longo do tempo.
-
-### RN57 — Data da análise
-
-Toda análise preditiva armazenada deve possuir a data e hora em que foi
-realizada.
+| ID | Regra de Negócio | Critério Operacional / Restrição |
+|---|---|---|
+| **RN01** | **Identificação única do aluno (RA)** | Cada aluno deve possuir um Registro Acadêmico (RA) estritamente único. O sistema deve impedir o salvamento de homônimos com o mesmo RA. |
+| **RN02** | **E-mail corporativo único** | Não é permitido o cadastro de dois alunos ou usuários utilizando o mesmo endereço de e-mail no banco de dados. |
+| **RN03** | **Identificação de Turma** | Cada turma deve possuir um código alfanumérico único vinculado obrigatoriamente a um único período letivo ativo. |
+| **RN04** | **Identificação de Disciplina** | Cada disciplina deve possuir um código curricular fixo e único no sistema. |
+| **RN05** | **Dados obrigatórios de input** | O sistema deve recusar cadastros de alunos, turmas ou disciplinas caso os campos essenciais (Nome, Documento, Código, Período) estejam nulos ou em branco. |
+| **RN06** | **Integridade de registros vinculados** | Um registro cadastral (Aluno, Turma ou Disciplina) não deve ser excluído fisicamente do sistema se houver dependências (Ex: notas ou faltas atreladas). Deve ser aplicada a deleção lógica. |
 
 ---
 
-# 11. Integridade dos Dados
+## 3. Matrícula e Relacionamentos Acadêmicos
 
-### RN58 — Integridade do aluno
-
-Todo registro acadêmico deve estar associado a um aluno existente.
-
-### RN59 — Integridade da disciplina
-
-Todo registro acadêmico deve estar associado a uma disciplina existente.
-
-### RN60 — Integridade da turma
-
-Todo registro acadêmico deve estar associado a uma turma existente.
-
-### RN61 — Integridade da avaliação
-
-Toda avaliação deve estar associada a uma disciplina existente.
-
-### RN62 — Integridade da análise preditiva
-
-Toda análise preditiva deve estar associada a um registro acadêmico
-existente.
-
-### RN63 — Exclusão de dados relacionados
-
-A exclusão de um registro que possua informações dependentes deverá
-respeitar as regras de integridade definidas no banco de dados.
+| ID | Regra de Negócio | Critério Operacional / Restrição |
+|---|---|---|
+| **RN07** | **Associação de Aluno à Turma** | Um aluno pode ser associado a uma ou mais turmas simultaneamente, contanto que pertençam ao mesmo período letivo e não criem conflitos de horário. |
+| **RN08** | **Unicidade de vínculo por turma** | É vedada a duplicação de matrícula de um mesmo aluno dentro da mesma turma. |
+| **RN09** | **Oferta de Disciplinas** | Uma única disciplina estrutural pode ser ofertada em múltiplas turmas de forma independente. |
+| **RN10** | **Composição do Registro Acadêmico** | Todo registro de desempenho (boletim) deve, obrigatoriamente, referenciar uma tríade válida: um aluno existente, uma disciplina existente e uma turma cadastrada. |
+| **RN11** | **Unicidade do Registro Disciplinar** | Um aluno não pode possuir mais de um histórico acadêmico ou diário de classe ativo para a mesma disciplina dentro da mesma turma. |
 
 ---
 
-# 12. Consistência das Informações
+## 4. Avaliações e Escala de Notas
 
-### RN64 — Consistência entre notas e média
-
-A média final armazenada deve corresponder às notas e aos pesos
-registrados para o aluno.
-
-### RN65 — Consistência entre faltas e frequência
-
-O percentual de frequência deve corresponder à quantidade de aulas e
-faltas registradas.
-
-### RN66 — Consistência da situação acadêmica
-
-A situação acadêmica armazenada deve estar de acordo com os critérios
-definidos para média e frequência.
-
-### RN67 — Atualização dos indicadores
-
-Alterações nos dados acadêmicos devem refletir nos indicadores e alertas
-correspondentes.
+| ID | Regra de Negócio | Critério Operacional / Restrição |
+|---|---|---|
+| **RN12** | **Vinculação de Avaliação** | Nenhuma avaliação (prova, trabalho) pode existir solta no sistema; deve estar amarrada a uma disciplina do período. |
+| **RN13** | **Identificação do Instrumento** | Toda avaliação exige uma categorização fixa (Prova, Trabalho, Atividade) e uma descrição textual identificadora. |
+| **RN14** | **Peso da Avaliação** | Toda avaliação cadastrada precisa ter um peso atribuído maior do que zero, que será injetado no cálculo das médias. |
+| **RN15** | **Consistência da Soma dos Pesos** | A somatória total dos pesos configurados para as avaliações regulares de uma disciplina deve fechar estritamente em **100% (ou 1,00)**. |
+| **RN16** | **Escala Métrica de Notas** | O sistema adota exclusivamente a escala numérica contínua que varia de **0,00 (nota mínima)** a **10,00 (nota máxima)**. |
+| **RN17** | **Validação de Entrada de Notas** | Qualquer tentativa de lançamento de notas abaixo de 0,00 ou acima de 10,00 deve disparar uma exceção de validação e interromper o salvamento. |
+| **RN18** | **Auditoria de Alteração de Nota** | Notas lançadas podem ser modificadas a qualquer tempo, desde que a operação seja efetuada por um perfil autenticado com permissões de Professor ou Coordenador. |
+| **RN19** | **Gatilho de Recálculo Automático** | A alteração, inclusão ou deleção de qualquer nota unitária obriga o sistema a disparar imediatamente a rotina de atualização da média final do aluno afetado. |
 
 ---
 
-# 13. Considerações sobre o Machine Learning
+## 5. Fórmulas de Cálculo de Médias
 
-### RN68 — Modelo preditivo
-
-O modelo de Machine Learning deverá utilizar dados acadêmicos disponíveis
-para identificar padrões associados ao risco acadêmico.
-
-### RN69 — Treinamento do modelo
-
-O modelo deverá ser treinado utilizando dados históricos adequados para
-a finalidade de classificação de risco.
-
-### RN70 — Classificação
-
-O resultado do modelo deverá ser convertido para o formato de score e
-nível de risco utilizado pelo SmartGrade.
-
-### RN71 — Atualização do modelo
-
-O modelo poderá ser atualizado ou retreinado conforme novos dados
-históricos estejam disponíveis.
-
-### RN72 — Transparência da análise
-
-Sempre que possível, o sistema deverá disponibilizar informações sobre
-os principais dados considerados na análise, permitindo melhor
-interpretação do resultado pelo usuário.
+| ID | Regra de Negócio | Expressão Matemática / Critério de Arredondamento |
+|---|---|---|
+| **RN20** | **Fórmula da Média Ponderada Geral** | A média final é calculada de forma ponderada através da equação estrutural:<br>$$\text{Média Final} = \sum (\text{Nota} \times \text{Peso})$$ |
+| **RN21** | **Pesos Parametrizados da Versão** | O modelo acadêmico padrão do SmartGrade fixa três avaliações obrigatórias estruturadas assim:<br>• **P1**: Peso de 30% (0,30)<br>• **P2**: Peso de 40% (0,40)<br>• **Trabalho**: Peso de 30% (0,30)<br>$$\text{Média Final} = (P1 \times 0,30) + (P2 \times 0,40) + (\text{Trabalho} \times 0,30)$$ |
+| **RN22** | **Precisão e Arredondamento** | O valor da média final calculado deve ser truncado ou arredondado para apresentar estritamente **duas casas decimais** para exibição e gravação em banco, preservando as notas parciais originais intactas. |
 
 ---
 
-# 14. Resumo das Regras Acadêmicas
+## 6. Frequência e Assiduidade
 
-## Notas
+| ID | Regra de Negócio | Expressão Matemática / Restrição Acadêmica |
+|---|---|---|
+| **RN23** | **Granularidade do Registro de Faltas** | As ausências devem ser computadas individualmente por aluno e por aula ministrada na disciplina. |
+| **RN24** | **Base de Cálculo da Frequência** | O cálculo do indicador de presença baseia-se na relação entre as aulas planejadas/ministradas e as ausências computadas. |
+| **RN25** | **Fórmula da Taxa de Frequência** | O percentual consolidado de assiduidade é extraído usando a equação matemática:<br>$$\text{Frequência (\%)} = \left(\frac{\text{Total de Aulas} - \text{Total de Faltas}}{\text{Total de Aulas}}\right) \times 100$$ |
+| **RN26** | **Piso Mínimo de Aprovação por Presença** | É fixado o percentual mínimo de **75% de frequência** como critério eliminatório para que o aluno seja aprovado de forma regular. |
+| **RN27** | **Soberania da Reprovação por Faltas** | Alunos que acumularem uma taxa de frequência estritamente inferior a 75% serão classificados imediatamente como reprovados por infrequência, ignorando qualquer nota atingida. |
+| **RN28** | **Zona de Atenção Preventiva** | Estudantes que apresentarem uma taxa de assiduidade situada na faixa limite **entre 75% e 80%** devem ser rotulados em estado de atenção. |
+| **RN29** | **Atualização Síncrona de Assiduidade** | O indicador de frequência percentual deve ser reprocessado na mesma hora em que uma falta for inserida ou removida do diário de classe. |
 
-- Escala: 0,00 a 10,00.
-- P1: 30%.
-- P2: 40%.
-- Trabalho: 30%.
-- Média mínima para aprovação direta: 7,00.
+---
 
-## Frequência
+## 7. Critérios de Definição da Situação Acadêmica Oficial
 
-- Frequência mínima: 75%.
-- Frequência entre 75% e 80%: situação de atenção.
-- Frequência inferior a 75%: reprovação por falta.
+| ID | Regra de Negócio | Condições Obrigatórias de Cruzamento | Status Resultante |
+|---|---|---|---|
+| **RN30** | **Multicritério Situacional** | A definição do estado do aluno exige a validação lógica concorrente da Nota Final **E** da Frequência Acumulada. | N/A |
+| **RN31** | **Aprovação Direta** | Média Final $\ge 7,00$ **E** Frequência $\ge 75\%$ | **Aprovado** |
+| **RN32** | **Elegibilidade para Exame** | Média Final $\ge 5,00$ e $< 7,00$ **E** Frequência $\ge 75\%$ | **Exame** |
+| **RN33** | **Reprovação por Desempenho** | Média Final $< 5,00$ **E** Frequência $\ge 75\%$ | **Reprovado por Nota** |
+| **RN34** | **Reprovação por Absenteísmo** | Frequência $< 75\%$ (Independentemente do valor da Média Final) | **Reprovado por Falta** |
+| **RN35** | **Precedência de Regra** | A regra **RN34** (Falta) possui prioridade de execução absoluta sobre as regras baseadas em nota (**RN31, RN32 e RN33**). | **Reprovado por Falta** |
+| **RN36** | **Estado de Transição Inicial** | Período letivo em andamento com dados de notas ou chamadas ainda incompletos. | **Cursando** |
+| **RN37** | **Gatilho de Status** | Qualquer modificação nos registros base (Notas/Faltas) força o reprocessamento imediato do status do aluno. | Dinâmico |
+| **RN38** | **Delimitação de Escopo (Fase 1)** | A identificação do status "Exame" deve ser gerada pelo sistema, porém, as regras de notas de corte pós-exame não integram o escopo da primeira versão. | Retido para o Escopo Futuro |
 
-## Situação acadêmica
+---
 
-| Condição | Situação |
-|---|---|
-| Média ≥ 7,00 e frequência ≥ 75% | Aprovado |
-| Média ≥ 5,00 e < 7,00 e frequência ≥ 75% | Exame |
-| Média < 5,00 e frequência ≥ 75% | Reprovado por Nota |
-| Frequência < 75% | Reprovado por Falta |
+## 8. Análise Preditiva e Score de Risco (Machine Learning)
 
-## Análise preditiva
+| ID | Regra de Negócio | Critério Estatístico / Definição de Variáveis |
+|---|---|---|
+| **RN39** | **Objetivo do Módulo Preditivo** | O cálculo preditivo atua de forma preventiva e serve apenas como apoio pedagógico, sem peso de decisão oficial na aprovação do aluno. |
+| **RN40** | **Vetor de Características (Features)** | O modelo de IA deve ler obrigatoriamente as seguintes variáveis como entrada: Notas parciais, Média móvel atual, Taxa percentual de faltas, Contagem absoluta de faltas e Volume de avaliações concluídas. |
+| **RN41** | **Escala de Risco Numérica** | A saída estatística calculada pelo algoritmo de Machine Learning deve gerar um score contido estritamente no intervalo de **0,00 (Risco Nulo)** a **1,00 (Risco Máximo)**. |
+| **RN42** | **Mapeamento de Faixas de Criticidade** | O score gerado em **RN41** deve categorizar o nível de atenção do aluno conforme a tabela de corte abaixo: |
 
-| Score | Nível |
-|---|---|
-| 0,00 – 0,39 | 🟢 Baixo Risco |
-| 0,40 – 0,69 | 🟡 Médio Risco |
-| 0,70 – 1,00 | 🔴 Alto Risco |
+### Classificação de Faixas de Risco (Módulo Preditivo)
 
-> A análise preditiva possui caráter de apoio à decisão e não altera
-> automaticamente a situação acadêmica oficial do aluno.
+| Score Calculado pela IA | Classificação de Criticidade | Ação do Sistema / Destino Pedagógico | ID da Regra |
+|---|---|---|---|
+| De `0,00` até `0,39` | **Baixo Risco** | Situação considerada estável; sem necessidade de intervenção pedagógica na listagem. | **RN43** |
+| De `0,40` até `0,69` | **Médio Risco** | Situação de atenção; o aluno deve entrar nos painéis de monitoramento preventivo. | **RN44** |
+| De `0,70` até `1,00` | **Alto Risco** | Situação crítica; o aluno deve ser destacado com prioridade máxima para acompanhamento pedagógico imediato. | **RN45** |
+
+| ID | Regra de Negócio | Critério Operacional / Restrição |
+|---|---|---|
+| **RN46** | **Recálculo do Vetor Preditivo** | O score probabilístico de inteligência artificial deve ser reprocessado em lotes agendados ou logo após modificações consistentes no histórico escolar do aluno. |
