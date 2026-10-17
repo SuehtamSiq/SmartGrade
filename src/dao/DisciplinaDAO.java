@@ -8,6 +8,24 @@ import java.util.List;
 
 public class DisciplinaDAO {
 
+    public DisciplinaDAO() {
+        criarTabelaSeNaoExistir();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        String sql = "CREATE TABLE IF NOT EXISTS disciplinas ("
+                   + "id_disciplina INT AUTO_INCREMENT PRIMARY KEY, "
+                   + "nome VARCHAR(150) NOT NULL, "
+                   + "codigo VARCHAR(50) NOT NULL UNIQUE"
+                   + ")";
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar/criar a tabela disciplinas: " + e.getMessage());
+        }
+    }
+
     public void cadastrar(Disciplina disc) {
         String sql = "INSERT INTO disciplinas (nome, codigo) VALUES (?, ?)";
         try (Connection conn = ConexaoBD.getConexao();

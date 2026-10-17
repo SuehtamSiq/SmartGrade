@@ -8,6 +8,24 @@ import java.util.List;
 
 public class TurmaDAO {
 
+    public TurmaDAO() {
+        criarTabelaSeNaoExistir();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        String sql = "CREATE TABLE IF NOT EXISTS turmas ("
+                   + "id_turma INT AUTO_INCREMENT PRIMARY KEY, "
+                   + "codigo VARCHAR(50) NOT NULL UNIQUE, "
+                   + "periodo_semestre VARCHAR(50) NOT NULL"
+                   + ")";
+        try (Connection conn = ConexaoBD.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar/criar a tabela turmas: " + e.getMessage());
+        }
+    }
+
     public void cadastrar(Turma turma) {
         String sql = "INSERT INTO turmas (codigo, periodo_semestre) VALUES (?, ?)";
         try (Connection conn = ConexaoBD.getConexao();
