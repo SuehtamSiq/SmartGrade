@@ -1,12 +1,13 @@
-package view;
+package view; 
 
 import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            TelaPrincipal tela = new TelaPrincipal();
-            tela.setVisible(true);
+            
+            TelaLogin telaLogin = new TelaLogin(); 
+            telaLogin.setVisible(true);
         });
     }
 }

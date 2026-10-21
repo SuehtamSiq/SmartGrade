@@ -134,4 +134,34 @@ public class RegistroAcademicoDAO {
             throw new RuntimeException("Erro ao excluir registro acadêmico: " + e.getMessage());
         }
     }
+    
+    public void atualizarNotaFalta(int idAluno, double notaP1, double notaP2, double notaTrabalho, int novasFaltas) {
+        
+        // 1. O Java calcula a nova Média automaticamente
+        double novaMedia = (notaP1 + notaP2 + notaTrabalho) / 3.0;
+        
+        // 2. O Java calcula a nova Frequência (100% menos 2.5% por cada falta)
+        double novaFrequencia = 100.0 - (novasFaltas * 2.5);
+        if (novaFrequencia < 0) novaFrequencia = 0.0; // Garante que não fica negativo
+        
+        // 3. A instrução SQL agora atualiza TUDO: notas, faltas, média e percentual!
+        String sql = "UPDATE registros_academicos SET nota_p1 = ?, nota_p2 = ?, nota_trabalho = ?, total_faltas = ?, media_final = ?, percentual_frequencia = ? WHERE id_aluno = ?";
+        
+        try (java.sql.Connection conn = conexao.ConexaoBD.getConexao();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            stmt.setDouble(1, notaP1);
+            stmt.setDouble(2, notaP2);
+            stmt.setDouble(3, notaTrabalho);
+            stmt.setInt(4, novasFaltas);
+            stmt.setDouble(5, novaMedia);       // Envia a média calculada
+            stmt.setDouble(6, novaFrequencia);  // Envia a frequência calculada
+            stmt.setInt(7, idAluno);
+            
+            stmt.executeUpdate();
+            
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Erro ao atualizar notas: " + e.getMessage());
+        }
+    }
 }

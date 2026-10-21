@@ -56,6 +56,45 @@ public class PainelAlunos extends JPanel {
         };
         tabelaAlunos = new JTable(tableModel);
         add(new JScrollPane(tabelaAlunos), BorderLayout.CENTER);
+        
+     // Painel para o botão de exclusão na parte inferior
+        javax.swing.JPanel painelAcoes = new javax.swing.JPanel();
+        javax.swing.JButton btnExcluir = new javax.swing.JButton("Excluir Aluno Selecionado");
+
+        btnExcluir.addActionListener(e -> {
+            int linhaSelecionada = tabelaAlunos.getSelectedRow();
+            
+            if (linhaSelecionada >= 0) {
+                int confirmacao = javax.swing.JOptionPane.showConfirmDialog(this, 
+                    "Tem a certeza que deseja inativar este aluno? O histórico será preservado.", 
+                    "Confirmar Exclusão", 
+                    javax.swing.JOptionPane.YES_NO_OPTION);
+
+                if (confirmacao == javax.swing.JOptionPane.YES_OPTION) {
+                    try {
+                        // Captura o ID na coluna 0 da linha selecionada
+                        int idAluno = (int) tableModel.getValueAt(linhaSelecionada, 0);
+
+                        // Executa a exclusão lógica
+                        dao.AlunoDAO dao = new dao.AlunoDAO();
+                        dao.excluir(idAluno);
+
+                        javax.swing.JOptionPane.showMessageDialog(this, "Aluno excluído com sucesso!");
+                        
+                        // Recarrega a tabela instantaneamente para remover o registo do ecrã
+                        carregarTabelaAlunos(); 
+
+                    } catch (Exception ex) {
+                        javax.swing.JOptionPane.showMessageDialog(this, "Erro ao excluir aluno: " + ex.getMessage());
+                    }
+                }
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Por favor, selecione um aluno na tabela primeiro.");
+            }
+        });
+
+        painelAcoes.add(btnExcluir);
+        add(painelAcoes, java.awt.BorderLayout.SOUTH);
 
         carregarTabelaAlunos();
     }

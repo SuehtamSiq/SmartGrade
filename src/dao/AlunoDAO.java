@@ -28,11 +28,12 @@ public class AlunoDAO {
     }
 
     public void cadastrar(Aluno aluno) {
-        String sql = "INSERT INTO alunos (nome, ra, email) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO alunos (ra, nome, email, ativo) VALUES (?, ?, ?, true) " +
+                "ON DUPLICATE KEY UPDATE nome = VALUES(nome), email = VALUES(email), ativo = true";
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, aluno.getNome());
-            stmt.setString(2, aluno.getRa());
+            stmt.setString(1, aluno.getRa());
+            stmt.setString(2, aluno.getNome());
             stmt.setString(3, aluno.getEmail());
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -41,7 +42,7 @@ public class AlunoDAO {
     }
 
     public List<Aluno> listarTodos() {
-        String sql = "SELECT * FROM alunos";
+        String sql = "SELECT * FROM alunos WHERE ativo = true";
         List<Aluno> lista = new ArrayList<>();
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -77,14 +78,17 @@ public class AlunoDAO {
     }
 
     public void excluir(int idAluno) {
-        // Corrigido de 'WHERE id = ?' para 'WHERE id_aluno = ?'
-        String sql = "DELETE FROM alunos WHERE id_aluno = ?";
+        // Mudámos de DELETE para UPDATE (Exclusão Lógica)
+        String sql = "UPDATE alunos SET ativo = false WHERE id_aluno = ?";
+
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, idAluno);
             stmt.executeUpdate();
+
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao excluir aluno: " + e.getMessage());
+            throw new RuntimeException("Erro ao inativar aluno: " + e.getMessage());
         }
-    }
+     }
 }

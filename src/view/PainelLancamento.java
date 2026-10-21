@@ -77,6 +77,60 @@ public class PainelLancamento extends JPanel {
         add(painelBotoes, BorderLayout.SOUTH);
 
         carregarCombos();
+        
+        javax.swing.JPanel painelAcoes = new javax.swing.JPanel();
+        javax.swing.JButton btnEditar = new javax.swing.JButton("Editar Nota/Falta do Aluno Selecionado");
+        
+        btnEditar.addActionListener(e -> {
+            int linhaSelecionada = tabelaNotasFaltas.getSelectedRow();
+
+            if (linhaSelecionada >= 0) {
+                try {
+                    // 1. Pega o ID do aluno na coluna 1
+                    int idAluno = Integer.parseInt(tabelaNotasFaltas.getValueAt(linhaSelecionada, 1).toString());
+
+                    // 2. Pede as 3 notas separadamente
+                    String strP1 = javax.swing.JOptionPane.showInputDialog(this, "Digite a NOTA P1:");
+                    if (strP1 == null || strP1.trim().isEmpty()) return;
+
+                    String strP2 = javax.swing.JOptionPane.showInputDialog(this, "Digite a NOTA P2:");
+                    if (strP2 == null || strP2.trim().isEmpty()) return;
+
+                    String strTrab = javax.swing.JOptionPane.showInputDialog(this, "Digite a NOTA DO TRABALHO:");
+                    if (strTrab == null || strTrab.trim().isEmpty()) return;
+
+                    // 3. Pede o novo número de faltas
+                    String strFaltas = javax.swing.JOptionPane.showInputDialog(this, "Digite o novo total de FALTAS:");
+                    if (strFaltas == null || strFaltas.trim().isEmpty()) return;
+
+                    // 4. Converte os valores
+                    double notaP1 = Double.parseDouble(strP1.replace(",", "."));
+                    double notaP2 = Double.parseDouble(strP2.replace(",", "."));
+                    double notaTrabalho = Double.parseDouble(strTrab.replace(",", "."));
+                    int novasFaltas = Integer.parseInt(strFaltas);
+
+                    // 5. Envia para o Banco de Dados com todas as variáveis (AGORA COMBINA COM O DAO)
+                    dao.RegistroAcademicoDAO dao = new dao.RegistroAcademicoDAO();
+                    dao.atualizarNotaFalta(idAluno, notaP1, notaP2, notaTrabalho, novasFaltas);
+
+                    javax.swing.JOptionPane.showMessageDialog(this, "Dados atualizados com sucesso!");
+
+                    // 6. Recarrega a tabela visualmente
+                    carregarAlunosTurma(); 
+
+                } catch (NumberFormatException ex) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Por favor, digite apenas números válidos (ex: 8.5 ou 8,5).");
+                } catch (Exception ex) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
+                }
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Selecione a linha de um aluno na tabela primeiro.");
+            }
+        });
+
+        painelAcoes.add(btnEditar);
+        add(painelAcoes, java.awt.BorderLayout.SOUTH);
+        // --------------------------------------------------
     }
 
     private void carregarCombos() {

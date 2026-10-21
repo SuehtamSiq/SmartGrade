@@ -37,6 +37,15 @@ public class TelaPrincipal extends JFrame {
         painelNav.add(btnLancamento);
         painelNav.add(btnDashboard);
 
+     // Criar e adicionar o botão de Sair à barra de navegação
+        javax.swing.JButton btnSair = new javax.swing.JButton("Sair / Trocar Utilizador");
+        btnSair.addActionListener(e -> {
+            model.Sessao.perfilLogado = ""; // Limpa a sessão
+            new TelaLogin().setVisible(true); // Abre o login
+            this.dispose(); // Fecha o ecrã principal
+        });
+        painelNav.add(btnSair);
+        
         add(painelNav, BorderLayout.NORTH);
 
         // Container com CardLayout para alternar telas
@@ -51,6 +60,29 @@ public class TelaPrincipal extends JFrame {
         btnAlunos.addActionListener(e -> alternarPainel("ALUNOS"));
         btnLancamento.addActionListener(e -> alternarPainel("LANCAMENTO"));
         btnDashboard.addActionListener(e -> alternarPainel("DASHBOARD"));
+
+        // --- COLE A LÓGICA DE CONTROLO DE ACESSO AQUI ---
+        String perfil = model.Sessao.perfilLogado;
+
+        if ("ALUNO".equals(perfil)) {
+            // O Aluno só pode ver as suas notas. Escondemos os botões de Alunos e Dashboard.
+            btnAlunos.setVisible(false);
+            btnDashboard.setVisible(false);
+            
+            // Força o ecrã a abrir já na aba permitida
+            alternarPainel("LANCAMENTO"); 
+        } 
+        else if ("PROFESSOR".equals(perfil)) {
+            // O Professor gere notas e risco, mas não gere o cadastro de alunos.
+            btnAlunos.setVisible(false);
+            
+            alternarPainel("LANCAMENTO");
+        }
+        else {
+            // COORDENADOR: Vê tudo. Pode iniciar no ecrã de alunos padrão.
+            alternarPainel("ALUNOS");
+        }
+        // ------------------------------------------------
     }
 
     public void inicializarTelas() {
